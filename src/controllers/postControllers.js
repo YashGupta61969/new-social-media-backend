@@ -1,30 +1,30 @@
 const db = require('../models')
-const jwt = require('jsonwebtoken')
+// const jwt = require('jsonwebtoken')
 
 const Posts = db.posts;
 const Comments = db.comments;
 const Users = db.users
 
 exports.upload = (req,res)=>{
-    const { image } = req.files;
-    if(!req.body.text && !image){
-        res.status(400).send({message:'Please Add Some Text Or Image to Post'})
+    if(!req.body.text && !req?.files?.image){
+       return res.status(400).send({status:'error',message:'Please Add Some Text Or Image to Post'})
     }
-    if(image){
+    if(req?.files?.image){
         const dir = __dirname.split('src')[0]
-        image.mv(dir+ '/uploads/' + image.name.replace(/ /g,''));
+        req.files.image.mv(dir+ '/uploads/' + req.files.image.name.replace(/ /g,''));
     }
     const data = {
-        image:`http://localhost:8000/uploads\\${image.name.replace(/ /g,'')}`,
+        image:req?.files?.image ? `http://localhost:8000/uploads\\${req.files.image.name.replace(/ /g,'')}`:null,
         userId :req.body.userId,
         text:req.body.text,
         visiblity:req.body.visiblity
     }
 
     Posts.create(data).then(data=>{
-        res.send(data)
+        res.send({status:'success',...data})
     }).catch(err=>{
-        res.send(err)
+        console.log(err)
+        res.status(500).send({status:'error',message:'Internal Server Error'})
     })
 }
 
@@ -32,9 +32,9 @@ exports.get_all = (req,res)=>{
     Posts.findAll({
         include: [{model:Users, attributes:['email',['id', 'userId']]},{model:Comments}]
     }).then(result=>{
-        res.send(result)
+        res.send({status:'success',result})
     }).catch(err=>{
-       res.send(err)
+       res.send.status(500).send({status:'error',message:'Internal Server Error'})
     })
 }
 
@@ -45,9 +45,9 @@ exports.update = (req,res)=>{
             id:req.params.id
         }
     }).then(result=>{
-        res.send(result)
+        res.send({status:'success',message:'Post Updated Successfully'})
     }).catch(err=>{
-        res.send(err)
+        res.send.status(500).send({status:'error',message:'Internal Server Error'})
     })
 }
 
@@ -56,7 +56,7 @@ exports.delete = (req,res)=>{
         where:{
             id:req.params.id
         }
-    }).then(result=>res.statu(204).send({
-        message:'Post Deleted'
-    })).catch(err=>res.send(err))
+    }).then(()=>res.status(201).send({
+        status:'success',message:'Post Deleted'
+    })).catch(err=>{console.log(err);res.status(500).send({status:'error',message:'Internal Server Error'})})
 }

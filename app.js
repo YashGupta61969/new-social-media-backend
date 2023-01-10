@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const cors = require('cors')
 const port = process.env.PORT || 8000
-const multer = require('multer')
 const fileUpload = require('express-fileupload');
 
 require('dotenv').config()
@@ -18,6 +17,7 @@ app.use(fileUpload({
 },
 abortOnLimit: true,
 }));
+
 app.use('/uploads', express.static('./uploads'));
 app.use(express.urlencoded({extended:true}));
 app.use(cors())

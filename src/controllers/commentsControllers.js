@@ -5,24 +5,24 @@ const Posts = db.posts
 exports.comment = (req,res)=>{
     const text = req.body.text
     const postId = req.body.postId;
-
-    Comments.create({text, postId}).then(data=>{
-        res.send(data)
+    const userId = req.body.userId;
+    Comments.create({text, postId, userId}).then(data=>{
+        res.send({status:'success',message:'Comment Created Successfully', data:{...data, user }})
     }).catch(err=>{
-        res.send(err)
+        res.send({status:'error',message:err.errors[0].message})
     })
 }
 
-exports.get_comments = (req,res)=>{
+exports.getComments = (req,res)=>{
     Comments.findAll({
         where:{
             postId:req.params.id
         },
         include:Posts
     }).then(data=>{
-        res.send(data)
+        res.send({status:'success',data})
     }).catch(err=>{
-        res.send(err)
+        res.send({status:'error',message:err.errors[0].message})
     })
 }
 
@@ -31,20 +31,19 @@ exports.update = (req,res)=>{
         where:{
             id:req.params.id
         }
-    }).then(result=>{
-        res.send(result)
+    }).then(()=>{
+        res.send({status:'success',message:"Comment Updated successfull"})
     }).catch(err=>{
-        res.send(err)
+        res.send({status:'error',message:err.errors[0].message})
     })
 }
 
 exports.delete = (req,res)=>{
-    // if(req.params.id === )
     Comments.destroy({
         where:{
             id:req.params.id
         }
-    }).then(result=>res.statu(204).send({
-        message:'Post Deleted'
-    })).catch(err=>res.send(err))
+    }).then(result=>res.send({
+        message:'Comment Deleted'
+    })).catch(err=>res.send({status:'success',message:err.errors[0].message}))
 }

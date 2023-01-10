@@ -5,10 +5,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         text: {
             type: DataTypes.STRING,
-            // allowNull: false
         },
         visiblity: {
-            type: DataTypes.STRING,
+            type: DataTypes.BOOLEAN,
+            allowNull:false
         },
         userId:{
             type:DataTypes.INTEGER,

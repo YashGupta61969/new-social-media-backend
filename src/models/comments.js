@@ -7,7 +7,11 @@ module.exports = (sequelize, DataTypes) => {
         postId:{
             type:DataTypes.INTEGER,
             allowNull:false
-        }
+        },
+        userId:{
+            type:DataTypes.INTEGER,
+            allowNull:false
+        },
     })
     return Comments
 }
