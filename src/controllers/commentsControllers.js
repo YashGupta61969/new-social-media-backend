@@ -15,6 +15,7 @@ exports.comment = (req,res)=>{
     })
 }
 
+
 exports.getComments = (req,res)=>{
     Comments.findAll({
         where:{
