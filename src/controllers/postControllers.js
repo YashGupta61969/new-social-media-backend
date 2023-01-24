@@ -1,4 +1,6 @@
 const db = require('../models')
+const fs= require('fs');
+const path = require('path');
 // const jwt = require('jsonwebtoken')
 
 const Posts = db.posts;
@@ -11,7 +13,7 @@ exports.upload = (req,res)=>{
     }
     if(req?.files?.image){
         const dir = __dirname.split('src')[0]
-        req.files.image.mv(dir+ '/uploads/' + req.files.image.name.replace(/ /g,''));
+        req.files.image.mv(dir+ '/uploads/' +  req.files.image.name.replace(/ /g,''));
     }
     const data = {
         image:req?.files?.image ? `http://localhost:8000/uploads\\${req.files.image.name.replace(/ /g,'')}`:null,
@@ -23,8 +25,7 @@ exports.upload = (req,res)=>{
     Posts.create(data).then(data=>{
         res.send({status:'success',...data})
     }).catch(err=>{
-        console.log(err)
-        res.status(500).send({status:'error',message:'Internal Server Error'})
+        res.status(500).send({status:'error',message:'Internal Server Error',error:err})
     })
 }
 
@@ -34,7 +35,8 @@ exports.get_all = (req,res)=>{
     }).then(result=>{
         res.send({status:'success',result})
     }).catch(err=>{
-       res.send.status(500).send({status:'error',message:'Internal Server Error'})
+        console.log(err)
+       res.status(500).send({status:'error',message:'Internal Server Error',error:err})
     })
 }
 
@@ -42,12 +44,12 @@ exports.get_all = (req,res)=>{
 exports.update = (req,res)=>{
     Posts.update(req.body,{
         where:{
-            id:req.params.id
+            id:req.params.id,
         }
     }).then(result=>{
         res.send({status:'success',message:'Post Updated Successfully'})
     }).catch(err=>{
-        res.send.status(500).send({status:'error',message:'Internal Server Error'})
+        res.send.status(500).send({status:'error',message:'Internal Server Error',error:err})
     })
 }
 
@@ -58,5 +60,35 @@ exports.delete = (req,res)=>{
         }
     }).then(()=>res.status(201).send({
         status:'success',message:'Post Deleted'
-    })).catch(err=>{console.log(err);res.status(500).send({status:'error',message:'Internal Server Error'})})
+    })).catch(err=>{console.log(err);res.status(500).send({status:'error',message:'Internal Server Error',error:err})})
+}
+
+exports.deleteImage = (req,res)=>{
+    fs.readdir('./uploads',(err,files)=>{
+        if(err){
+            console.log(err)
+            return res.send({error:err});
+        }
+        const name = files.find(file=>file===req.params.name)
+        if(name){
+            const directory = __dirname.split('\\').map((f=>{
+                const replaced = f.replace('src','').replace('controllers','')
+                if(replaced){
+                    return replaced
+                }
+            })).filter(val=>{
+                if(val){
+                    return val;
+                }
+            }).join('\\')
+
+            fs.unlink(path.join(directory,'\\uploads\\', name),(err)=>{
+                if(err){
+                    res.send(err)
+                }else{
+                    res.send({messgae:'Image Deleted Successfully'})
+                }
+            })
+        }
+    })
 }

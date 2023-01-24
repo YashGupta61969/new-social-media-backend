@@ -33,6 +33,7 @@ router.get("/", checkAuth, postControllers.get_all);
 // router.get("/:id", upload, checkAuth,postControllers.get_one);
 router.post("/", checkAuth,postControllers.upload);
 router.delete("/:id", checkAuth,postControllers.delete);
+router.delete("/image/:name", checkAuth,postControllers.deleteImage);
 router.patch("/:id", checkAuth,postControllers.update);
 
 module.exports = router
